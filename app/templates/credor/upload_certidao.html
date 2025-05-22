@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload de Certidão - Mercatório{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Upload de Certidão</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('web.detalhes_credor', credor_id=credor.id) }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-warning text-dark">
+        <h3 class="card-title h5 mb-0">Formulário de Upload</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('web.nova_certidao', credor_id=credor.id) }}" enctype="multipart/form-data" id="uploadCertidaoForm">
+            <div class="mb-3">
+                <label for="tipo" class="form-label">Tipo de Certidão*</label>
+                <select class="form-select" id="tipo" name="tipo" required>
+                    <option value="" selected disabled>Selecione o tipo de certidão</option>
+                    <option value="federal">Federal</option>
+                    <option value="estadual">Estadual</option>
+                    <option value="municipal">Municipal</option>
+                    <option value="trabalhista">Trabalhista</option>
+                    <option value="fgts">FGTS</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="status" class="form-label">Status da Certidão*</label>
+                <select class="form-select" id="status" name="status" required>
+                    <option value="" selected disabled>Selecione o status</option>
+                    <option value="negativa">Negativa</option>
+                    <option value="positiva">Positiva</option>
+                    <option value="positiva_efeito_negativa">Positiva com Efeito de Negativa</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="arquivo" class="form-label">Arquivo</label>
+                <input class="form-control" type="file" id="arquivo" name="arquivo">
+                <div class="form-text">Formatos aceitos: PDF, PNG, JPG, JPEG</div>
+            </div>
+            
+            <!-- Prévia da imagem -->
+            <div class="mb-3" id="previewContainer" style="display: none;">
+                <label class="form-label">Prévia:</label>
+                <div class="text-center">
+                    <img id="preview" src="#" alt="Prévia da certidão" class="img-fluid img-thumbnail" style="max-height: 200px;">
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-warning text-dark" id="submitButton">Enviar Certidão</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Variável para controlar se o formulário já foi enviado
+    let formSubmitted = false;
+    
+    // Função para salvar as preferências do usuário no localStorage
+    function saveUserPreferences() {
+        // Salvar valores dos campos de formulário
+        const tipo = document.getElementById('tipo').value;
+        const status = document.getElementById('status').value;
+        
+        if (tipo) {
+            localStorage.setItem('certidao_tipo_preferido', tipo);
+        }
+        if (status) {
+            localStorage.setItem('certidao_status_preferido', status);
+        }
+    }
+    
+    // Função para restaurar as preferências do usuário do localStorage
+    function restoreUserPreferences() {
+        const tipoPreferido = localStorage.getItem('certidao_tipo_preferido');
+        const statusPreferido = localStorage.getItem('certidao_status_preferido');
+        
+        const tipoSelect = document.getElementById('tipo');
+        const statusSelect = document.getElementById('status');
+        
+        if (tipoPreferido) {
+            // Verificar se a opção existe antes de selecioná-la
+            for (let i = 0; i < tipoSelect.options.length; i++) {
+                if (tipoSelect.options[i].value === tipoPreferido) {
+                    tipoSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        if (statusPreferido) {
+            // Verificar se a opção existe antes de selecioná-la
+            for (let i = 0; i < statusSelect.options.length; i++) {
+                if (statusSelect.options[i].value === statusPreferido) {
+                    statusSelect.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+    }
+    
+    // Limpar o formulário ao carregar a página para evitar dados residuais
+    document.addEventListener('DOMContentLoaded', function() {
+        // Limpar completamente o formulário
+        const form = document.getElementById('uploadCertidaoForm');
+        form.reset();
+        
+        // Limpar o input de arquivo
+        const fileInput = document.getElementById('arquivo');
+        fileInput.value = '';
+        
+        // Esconder o container de prévia
+        document.getElementById('previewContainer').style.display = 'none';
+        
+        // Restaurar preferências do usuário
+        restoreUserPreferences();
+        
+        // Visualização prévia da imagem
+        fileInput.addEventListener('change', function() {
+            const previewContainer = document.getElementById('previewContainer');
+            const preview = document.getElementById('preview');
+            const file = this.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                }
+                
+                // Verificar se é uma imagem
+                if (file.type.match('image.*')) {
+                    reader.readAsDataURL(file);
+                } else {
+                    // Se não for imagem, mostrar ícone genérico
+                    preview.src = '/static/img/file-icon.png';
+                    previewContainer.style.display = 'block';
+                }
+            } else {
+                previewContainer.style.display = 'none';
+            }
+        });
+        
+        // Adicionar evento de submit ao formulário
+        form.addEventListener('submit', function(event) {
+            // Prevenir múltiplos envios
+            if (formSubmitted) {
+                event.preventDefault();
+                return false;
+            }
+            
+            // Salvar preferências do usuário
+            saveUserPreferences();
+            
+            // Marcar formulário como enviado
+            formSubmitted = true;
+            
+            // Desabilitar o botão de envio para evitar cliques múltiplos
+            document.getElementById('submitButton').disabled = true;
+            
+            // Permitir que o formulário seja enviado
+            return true;
+        });
+    });
+</script>
+{% endblock %}

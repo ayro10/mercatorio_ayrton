@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block title %}Visualizar Imagem - Mercatório{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Visualização de Imagem</h2>
+    </div>
+    <div class="col-auto">
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body text-center">
+        <img src="{{ url_for('static', filename=arquivo_url) }}" class="img-fluid" alt="Imagem do documento">
+    </div>
+</div>
+{% endblock %}

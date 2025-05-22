@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Credor - Mercatório{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Cadastrar Novo Credor</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('web.index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title h5 mb-0">Formulário de Cadastro</h3>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('web.novo_credor') }}">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <h4 class="h5">Dados do Credor</h4>
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome*</label>
+                        <input type="text" class="form-control" id="nome" name="nome" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cpf_cnpj" class="form-label">CPF/CNPJ*</label>
+                        <input type="text" class="form-control" id="cpf_cnpj" name="cpf_cnpj" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email*</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefone" class="form-label">Telefone*</label>
+                        <input type="text" class="form-control" id="telefone" name="telefone" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h4 class="h5">Dados do Precatório</h4>
+                    <div class="mb-3">
+                        <label for="numero_precatorio" class="form-label">Número do Precatório*</label>
+                        <input type="text" class="form-control" id="numero_precatorio" name="precatorio[numero_precatorio]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="valor_nominal" class="form-label">Valor Nominal*</label>
+                        <div class="input-group">
+                            <span class="input-group-text">R$</span>
+                            <input type="number" class="form-control" id="valor_nominal" name="precatorio[valor_nominal]" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="foro" class="form-label">Foro*</label>
+                        <input type="text" class="form-control" id="foro" name="precatorio[foro]" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="data_publicacao" class="form-label">Data de Publicação*</label>
+                        <input type="date" class="form-control" id="data_publicacao" name="precatorio[data_publicacao]" required>
+                    </div>
+                </div>
+            </div>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary">Cadastrar</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Máscara para CPF/CNPJ
+    $(document).ready(function() {
+        $('#cpf_cnpj').on('keyup', function() {
+            let value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 11) {
+                // CPF
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+            } else {
+                // CNPJ
+                value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+                value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+                value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            }
+            $(this).val(value);
+        });
+
+        // Máscara para telefone
+        $('#telefone').on('keyup', function() {
+            let value = $(this).val().replace(/\D/g, '');
+            if (value.length <= 10) {
+                value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                value = value.replace(/(\d{4})(\d)/, '$1-$2');
+            } else {
+                value = value.replace(/(\d{2})(\d)/, '($1) $2');
+                value = value.replace(/(\d{5})(\d)/, '$1-$2');
+            }
+            $(this).val(value);
+        });
+    });
+</script>
+{% endblock %}

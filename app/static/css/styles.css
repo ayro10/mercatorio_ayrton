@@ -1,0 +1,66 @@
+/* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+/* Cabeçalho */
+header {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Cards */
+.card {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+/* Tabelas */
+.table th {
+    font-weight: 600;
+    background-color: #f8f9fa;
+}
+
+/* Botões */
+.btn {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Formulários */
+.form-control, .form-select {
+    border-radius: 4px;
+}
+
+.form-control:focus, .form-select:focus {
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Badges */
+.badge {
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+}
+
+/* Alertas */
+.alert {
+    border-radius: 4px;
+}
+
+/* Rodapé */
+footer {
+    border-top: 1px solid #e9ecef;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+}

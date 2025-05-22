@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalhes do Credor - Mercatório{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2>Detalhes do Credor</h2>
+    </div>
+    <div class="col-auto">
+        <a href="{{ url_for('web.index') }}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h3 class="card-title h5 mb-0">Informações do Credor</h3>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Nome:</strong> {{ credor.nome }}</p>
+                <p><strong>CPF/CNPJ:</strong> {{ credor.cpf_cnpj }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Email:</strong> {{ credor.email }}</p>
+                <p><strong>Telefone:</strong> {{ credor.telefone }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Precatórios -->
+<div class="card mb-4">
+    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title h5 mb-0">Precatórios</h3>
+    </div>
+    <div class="card-body">
+        {% if credor.precatorios %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Número</th>
+                            <th>Valor Nominal</th>
+                            <th>Foro</th>
+                            <th>Data de Publicação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for precatorio in credor.precatorios %}
+                            <tr>
+                                <td>{{ precatorio.numero_precatorio }}</td>
+                                <td>R$ {{ "%.2f"|format(precatorio.valor_nominal) }}</td>
+                                <td>{{ precatorio.foro }}</td>
+                                <td>{{ precatorio.data_publicacao.strftime('%d/%m/%Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">Nenhum precatório cadastrado.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Documentos Pessoais -->
+<div class="card mb-4">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <h3 class="card-title h5 mb-0">Documentos Pessoais</h3>
+        <a href="{{ url_for('web.novo_documento', credor_id=credor.id) }}" class="btn btn-sm btn-light">
+            <i class="bi bi-plus-circle"></i> Adicionar Documento
+        </a>
+    </div>
+    <div class="card-body">
+        {% if credor.documentos %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Data de Envio</th>
+                            <th>Arquivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for documento in credor.documentos %}
+                            <tr>
+                                <td>{{ documento.tipo }}</td>
+                                <td>{{ documento.enviado_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    <a href="{{ documento.arquivo_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-file-earmark"></i> Visualizar
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">Nenhum documento pessoal cadastrado.</div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Certidões -->
+<div class="card mb-4">
+    <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+        <h3 class="card-title h5 mb-0">Certidões</h3>
+        <div>
+            <a href="{{ url_for('web.nova_certidao', credor_id=credor.id) }}" class="btn btn-sm btn-light me-2">
+                <i class="bi bi-plus-circle"></i> Adicionar Certidão
+            </a>
+            <form method="POST" action="{{ url_for('web.buscar_certidoes', credor_id=credor.id) }}" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-dark">
+                    <i class="bi bi-search"></i> Buscar Certidões
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="card-body">
+        {% if credor.certidoes %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Tipo</th>
+                            <th>Origem</th>
+                            <th>Status</th>
+                            <th>Data de Recebimento</th>
+                            <th>Arquivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for certidao in credor.certidoes %}
+                            <tr>
+                                <td>{{ certidao.tipo }}</td>
+                                <td>{{ certidao.origem }}</td>
+                                <td>
+                                    <span class="badge {% if certidao.status == 'negativa' %}bg-success{% elif certidao.status == 'positiva' %}bg-danger{% else %}bg-secondary{% endif %}">
+                                        {{ certidao.status }}
+                                    </span>
+                                </td>
+                                <td>{{ certidao.recebida_em.strftime('%d/%m/%Y %H:%M') }}</td>
+                                <td>
+                                    {% if certidao.arquivo_url %}
+                                        <a href="{{ certidao.arquivo_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-file-earmark"></i> Visualizar
+                                        </a>
+                                    {% elif certidao.conteudo_base64 %}
+                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#certidaoModal{{ certidao.id }}">
+                                            <i class="bi bi-file-earmark"></i> Visualizar
+                                        </button>
+                                        
+                                        <!-- Modal para visualizar conteúdo base64 -->
+                                        <div class="modal fade" id="certidaoModal{{ certidao.id }}" tabindex="-1" aria-labelledby="certidaoModalLabel{{ certidao.id }}" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="certidaoModalLabel{{ certidao.id }}">Certidão {{ certidao.tipo }}</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <pre class="bg-light p-3">{{ certidao.conteudo_base64 }}</pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">Sem arquivo</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info">Nenhuma certidão cadastrada.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Adicionar ícones Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        // Código JavaScript adicional se necessário
+    });
+</script>
+{% endblock %}
